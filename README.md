@@ -10,17 +10,10 @@
 Data extraction system by means of image processing and variable correlation.
 
 ## 2. Problem
-Many companies focused on refrigeration, with machines that regulate temperature in closed environments, do not have an internal control 
-system for their mechanisms. The current process they use for data collection consists of an operator who, at certain intervals of time,
-records the information shown on the screens of the devices in a spreadsheet. This situation causes the company to lose money due to the
-poor regulation of their systems and they see the need to invest in a control model.
+Many companies focused on refrigeration, with machines that regulate temperature in closed environments, do not have an internal control system for their mechanisms. The current process used for data collection consists of an operator who, at certain intervals of time, records the information shown on the screens of the devices in a spreadsheet. This situation causes the company to lose money due to the poor regulation of their systems and they see the need to invest in a control model.
 
 ## 3. Justification
-Due to the above, there is the need a system that can obtain this data and analyze it in a simple and comfortable way for the company. 
-The data provided by the systems are shown by a display, therefore, the proposed methodology consists in the installation of a webcam that 
-focuses on that display. In this way you can monitor the data without having the need to have hardware inside the company with the 
-exception of the camera and a small computer system. By means of image analysis it is possible to obtain numerical and non-numerical 
-values, and finally send them to a web server where the correlation and analysis of data would be performed.
+Due to the above, there is a neeed for a system capable of obtaining and analyzing this data in a simple and comfortable way for the company. The data provided by the systems are shown in a display, therefore, the proposed methodology consists in the installation of a webcam that focuses on that display. In this way it is posible to monitor the data without having the need to have hardware inside the company with the exception of the camera and a small computer system. By means of image analysis it is possible to obtain numerical and non-numerical values, and finally send them to a web server where the correlation and analysis of data will be performed.
 
 ## 4. Objectives
   * ### General
