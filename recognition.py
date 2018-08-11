@@ -5,7 +5,7 @@ import pytesseract
 from PIL import Image
 
 # Path to the image
-src_path = "C:/Users/Jhon/Pictures/PF/"
+src_path = #Path to image's directory
 
 def get_string(img_path):
     # Load color image in grayscale
@@ -35,7 +35,7 @@ print("---Starting recognition---")
 
 # Printing results in a .txt file
 file = codecs.open("results.txt", "w", "utf-8")
-file.write("\n" + get_string(src_path + "slice1.png"))
+file.write("\n" + get_string(src_path + image.png))
 file.close()
 
 print("---DONE---")
