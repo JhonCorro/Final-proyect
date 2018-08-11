@@ -1,10 +1,10 @@
 # Ultimate-project
 
 ## Table of contents
-  1.  [Title](https://github.com/JhonCorro/Ultimate-project/new/master?readme=1#1-title-might-be-changed)
-  2.  [Problem](https://github.com/JhonCorro/Ultimate-project/new/master?readme=1#2-problem)
-  3.  [Justification](https://github.com/JhonCorro/Ultimate-project/new/master?readme=1#3-justification)
-  4.  [Objectives](https://github.com/JhonCorro/Ultimate-project/new/master?readme=1#4-objectives)
+  1.  [Title](https://github.com/JhonCorro/Ultimate-project#1-title-might-be-changed)
+  2.  [Problem](https://github.com/JhonCorro/Ultimate-project#2-problem)
+  3.  [Justification](https://github.com/JhonCorro/Ultimate-project#3-justification)
+  4.  [Objectives](https://github.com/JhonCorro/Ultimate-project#4-objectives)
 
 ## 1. Title (might be changed)
 Data extraction system by means of image processing and variable correlation.
