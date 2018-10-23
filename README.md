@@ -6,7 +6,7 @@
   3.  [Justification](https://github.com/JhonCorro/Ultimate-project#3-justification)
   4.  [Objectives](https://github.com/JhonCorro/Ultimate-project#4-objectives)
 
-## 1. Title (might be changed)
+## 1. Title
 Data extraction system by means of image processing and variable correlation.
 
 ## 2. Problem
