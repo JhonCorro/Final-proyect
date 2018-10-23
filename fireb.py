@@ -10,7 +10,6 @@ firebase = firebase.FirebaseApplication('https://proyecto-b2674.firebaseio.com/'
 
 def pushed():
     date = datetime.datetime.now()
-    name = str(date)
     data_dict = {"Temperatura del Déposito de Aceite": "1",
                  "Presión de Aceite": "2",
                  "Presión en Condesador": "3",
@@ -20,7 +19,7 @@ def pushed():
     #firebase.post('/RPi', data_dict)
     firebase.put('RPi', "NombreX" ,data_dict)
 
-    lbl.configure(text="you clicked")
+    lbl_1.configure(text="you clicked")
 
 def get_data():
     global p_oil, p_ev, p_con, s_con, s_ev, temp
