@@ -18,7 +18,7 @@ def pushed():
                  "Presión del Evaporador": "5",
                  "Saturación en Evaporador": "6"}
     #firebase.post('/RPi', data_dict)
-    firebase.put('RPi', "Callate" ,data_dict)
+    firebase.put('RPi', "NombreX" ,data_dict)
 
     lbl.configure(text="you clicked")
 
