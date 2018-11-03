@@ -72,6 +72,7 @@ def plot(x, y, x_label, y_label):
     p.show()
 
 
+# Lets_plot allows to get the list of data and the respective label for the radio buttons selected
 def lets_plot(name1, name2):
     if name1 == '1x':
         print("1 good")
@@ -100,6 +101,8 @@ def check_for_correlation():
             if i != j:
                 amount += 1
                 corr = np.corrcoef(variables[i], variables[j])
+                if corr >= 0.8:
+                    print("Relevant correlation")
                 print("Coeficiente de correlación: {}".format(corr[0][1]))
     print(amount)
     """# Insert values into textbox
