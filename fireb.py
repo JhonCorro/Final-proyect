@@ -1,5 +1,6 @@
 import datetime
 import random
+from tkinter.ttk import Combobox
 
 from firebase import firebase
 import matplotlib.pyplot as p
@@ -7,7 +8,8 @@ import numpy as np
 from tkinter import *
 
 variables = []
-p_oil, p_ev, p_con, s_con, s_ev, temp = [], [], [], [], [], []
+corr_p, p_oil, p_ev, p_con, s_con, s_ev, temph_i, temph_s, tempc_i, tempc_s, temp_d, temp_a = [], [], [], [], [], [], \
+                                                                                              [], [], [], [], [], []
 firebase = firebase.FirebaseApplication('https://proyecto-b2674.firebaseio.com/')
 
 
@@ -26,20 +28,28 @@ def pushed():
     lbl_1.configure(text="you clicked")
 
 
-def get_data(poil, pev, pcon, scon, sev, tem):
+def get_data(corrp, poil, pev, pcon, scon, sev, temphi, temphs, tempci, tempcs, tempd, tempa):
     # Here we clear the array
     variables.clear()
+    data_dict = firebase.get("/data", None)
+    print(combo1.get())
 
-    data_dict = firebase.get("/RPi", None)
+    if combo1.get() == "Ultimas 24 horas":
+        length = 10  # value of the radio button for time lapse
+    elif combo1.get() == 'Ultimas 72 horas':
+        length = 50
+    else:
+        length = 100
 
-    length = selected.get()  # value of the radio button for time lapse
     count = 0  # This counter indicates how much variables we are gonna get
     for i, j in data_dict.items():
         count += 1
         if count > length:
             break
         for x, y in j.items():
-            if x == "Presión de Aceite":
+            if x == "% de Corriente a Plena Carga":
+                corrp.append(y)
+            elif x == "Presión de Aceite":
                 poil.append(y)
             elif x == "Presión del Evaporador":
                 pev.append(y)
@@ -48,18 +58,39 @@ def get_data(poil, pev, pcon, scon, sev, tem):
             elif x == "Saturación en Condesador":
                 scon.append(y)
             elif x == "Saturación en Evaporador":
-                s_ev.append(y)
+                sev.append(y)
+            elif x == "Temperatura de Agua Helada":
+                for z, w in y.items():
+                    if z == "Introduciendo":
+                        temphi.append(w)
+                    else:
+                        temphs.append(w)
+            elif x == "Temperatura de Agua de Condensación":
+                for z, w in y.items():
+                    if z == "Introduciendo":
+                        tempci.append(w)
+                    else:
+                        tempcs.append(w)
+            elif x == "Temperatura de Descarga":
+                tempd.append(y)
             else:
-                tem.append(y)
+                tempa.append(y)
     print("Contador: ", count)
+    corrp = np.array(corrp)
     poil = np.array(poil)
     pev = np.array(pev)
     pcon = np.array(pcon)
     scon = np.array(scon)
     sev = np.array(sev)
-    tem = np.array(tem)
+    temphi = np.array(temphi)
+    temphs = np.array(temphs)
+    tempci = np.array(tempci)
+    tempcs = np.array(tempcs)
+    tempd = np.array(tempd)
+    tempa = np.array(tempa)
+
     # Here we return all variables as a dictionary
-    variables.extend((poil, pev, pcon, scon, sev, tem))
+    variables.extend((corrp, poil, pev, pcon, scon, sev, temphi, temphs, tempci, tempcs, tempd, tempa))
 
 
 def plot(x, y, x_label, y_label):
@@ -101,9 +132,10 @@ def check_for_correlation():
             if i != j:
                 amount += 1
                 corr = np.corrcoef(variables[i], variables[j])
+                corr = corr[0][1]
                 if corr >= 0.8:
                     print("Relevant correlation")
-                print("Coeficiente de correlación: {}".format(corr[0][1]))
+                print("Coeficiente de correlación: {}".format(corr))
     print(amount)
     """# Insert values into textbox
     txt_1.configure(state='normal')
@@ -132,27 +164,33 @@ if __name__ == "__main__":
     # Push data
     btn_1 = Button(window, text="Push data", bg="gray", fg="black", command=pushed)
     # Get data
-    btn_2 = Button(window, text="Get data", bg="gray", fg="black", command=lambda: get_data(p_oil, p_ev, p_con, s_con,
-                                                                                            s_ev, temp))
+    btn_2 = Button(window, text="Get data", bg="gray", fg="black", command=lambda: get_data(corr_p, p_oil, p_ev, p_con,
+                                                                                            s_con, s_ev, temph_i,
+                                                                                            temph_s, tempc_i, tempc_s,
+                                                                                            temp_d, temp_a))
     # Graph variables
-    btn_3 = Button(window, text="Graph", bg="gray", fg="black", command=lambda: lets_plot(selected2.get(), selected3.get()))
+    btn_3 = Button(window, text="Graph", bg="gray", fg="black", command=lambda: lets_plot(combo2.get(), selected3.get()))
     # Check correlation
     btn_4 = Button(window, text="Check", bg="gray", fg="black", command=lambda: check_for_correlation())
 
-    '''Radio buttons'''
+    '''Combo boxes'''
     # Radio buttons values must be different from each other
-    selected = IntVar()  # Selected for time lapse
     selected2 = StringVar()  # Selected for x axis
     selected3 = StringVar()  # Selected for y axis
+    combo1 = Combobox(window, state='readonly')
+    combo2 = Combobox(window, state='readonly')
+    combo3 = Combobox(window, state='readonly')
 
-    # Time lapses
-    rad1 = Radiobutton(window, text='Ultimas 24 horas', value=10, variable=selected)
-    rad2 = Radiobutton(window, text='Ultimas 72 horas', value=50, variable=selected)
-    rad3 = Radiobutton(window, text='Ultima semana', value=100, variable=selected)
+    combo1['values'] = ('Ultimas 24 horas', 'Ultimas 72 horas', 'Ultima semana')
+    combo2['values'] = ('Temperatura de Descarga', '% de Corriente a Plena Carga', 'Temp Introduciendo Agua de condensación',
+                        'Temp Introduciendo agua de condensación','Temperatura del Depósito de Aceite', 'Presión de Aceite',
+                        'Temp Introduciendo Agua Helada' 'Temp Salida Agua Helada')
+    combo3['values'] = (1, 2, 3, 4, 5, "Text")
+
 
     # Graph x axis
-    rad1x = Radiobutton(window, text='Presion aceite', value='1x', variable=selected2)
-    rad2x = Radiobutton(window, text='Presion aceite', value='2x', variable=selected2)
+    rad1x = Radiobutton(window, text='Temperatura de Descarga', value='1x', variable=selected2)
+    rad2x = Radiobutton(window, text='% de Corriente a Plena Carga', value='2x', variable=selected2)
     rad3x = Radiobutton(window, text='Presion aceite', value='3x', variable=selected2)
     rad4x = Radiobutton(window, text='Presion aceite', value='4x', variable=selected2)
     rad5x = Radiobutton(window, text='Presion aceite', value='5x', variable=selected2)
@@ -207,9 +245,9 @@ if __name__ == "__main__":
 
     '''Radio buttons grid'''
     # Time lapse
-    rad1.grid(column=0, row=5)
-    rad2.grid(column=0, row=6)
-    rad3.grid(column=0, row=7)
+    combo1.grid(column=20, row=5)
+    combo2.grid(column=21, row=5)
+    combo3.grid(column=22, row=5)
 
     # Graph x axis
     rad1x.grid(column=3, row=10)
