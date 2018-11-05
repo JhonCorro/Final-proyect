@@ -8,6 +8,9 @@ import numpy as np
 from tkinter import *
 
 variables = []
+values = []
+dictionary = []
+corr_mat = np.zeros((12, 12), int)
 corr_p, p_oil, p_ev, p_con, s_con, s_ev, temph_i, temph_s, tempc_i, tempc_s, temp_d, temp_a = [], [], [], [], [], [], \
                                                                                               [], [], [], [], [], []
 firebase = firebase.FirebaseApplication('https://proyecto-b2674.firebaseio.com/')
@@ -32,7 +35,6 @@ def get_data(corrp, poil, pev, pcon, scon, sev, temphi, temphs, tempci, tempcs, 
     # Here we clear the array
     variables.clear()
     data_dict = firebase.get("/data", None)
-    print(combo1.get())
 
     if combo1.get() == "Ultimas 24 horas":
         length = 10  # value of the radio button for time lapse
@@ -95,8 +97,9 @@ def get_data(corrp, poil, pev, pcon, scon, sev, temphi, temphs, tempci, tempcs, 
 
 def plot(x, y, x_label, y_label):
     p.figure(x_label + " vs " + y_label)
-    print("x:", x)
-    print("y:", y)
+    corr = np.corrcoef(x, y)
+    corr = corr[0][1]
+    p.title("Correlation coefficient: {}".format(corr))
     p.plot(x, y, ".r")
     p.xlabel(x_label)
     p.ylabel(y_label)
@@ -105,27 +108,69 @@ def plot(x, y, x_label, y_label):
 
 # Lets_plot allows to get the list of data and the respective label for the radio buttons selected
 def lets_plot(name1, name2):
-    if name1 == '1x':
-        print("1 good")
+
+    """X"""
+    if name1 == 'Temperatura de Descarga':
+        x = variables[10]
+    elif name1 == '% de Corriente a Plena Carga':
         x = variables[0]
-        x_label = 'Presion aceite'
-    elif name1 == '2x':
+    elif name1 == 'Temp Introduciendo Agua de condensación':
+        x = variables[8]
+    elif name1 == 'Temp Salida agua de condensación':
+        x = variables[9]
+    elif name1 == 'Temperatura del Depósito de Aceite':
+        x = variables[11]
+    elif name1 == 'Presión de Aceite':
         x = variables[1]
-    else:
+    elif name1 == 'Temp Introduciendo Agua Helada':
+        x = variables[6]
+    elif name1 == 'Temp Salida Agua Helada':
+        x = variables[7]
+    elif name1 == 'Presión de condensador':
+        x = variables[3]
+    elif name1 == 'Saturacion en condensador':
+        x = variables[4]
+    elif name1 == 'Presion del Evaporador':
+        x = variables[2]
+    if name1 == 'Saturacion en Evaporador':
         x = variables[5]
-    if name2 == '1y':
+
+    """Y"""
+    if name2 == 'Temperatura de Descarga':
+        y = variables[10]
+    elif name2 == '% de Corriente a Plena Carga':
         y = variables[0]
-    elif name2 == '2y':
+    elif name2 == 'Temp Introduciendo Agua de condensación':
+        y = variables[8]
+    elif name2 == 'Temp Salida agua de condensación':
+        y = variables[9]
+    elif name2 == 'Temperatura del Depósito de Aceite':
+        y = variables[11]
+    elif name2 == 'Presión de Aceite':
         y = variables[1]
-    else:
-        print("2 good")
+    elif name2 == 'Temp Introduciendo Agua Helada':
+        y = variables[6]
+    elif name2 == 'Temp Salida Agua Helada':
+        y = variables[7]
+    elif name2 == 'Presión de condensador':
+        y = variables[3]
+    elif name2 == 'Saturacion en condensador':
+        y = variables[4]
+    elif name2 == 'Presion del Evaporador':
+        y = variables[2]
+    if name2 == 'Saturacion en Evaporador':
         y = variables[5]
-        y_label = 'Temperatura'
-    plot(x, y, x_label, y_label)
+
+    plot(x, y, name1, name2)
+
+def update(list):
+    combo3['values'] = list
 
 
 def check_for_correlation():
     amount = 0
+    corr_mat.fill(0)
+
     print("cantidad variables: ", len(variables))
     for i in range(0, len(variables)):  # len(variables) to get all data
         for j in range(i, len(variables)):
@@ -133,14 +178,44 @@ def check_for_correlation():
                 amount += 1
                 corr = np.corrcoef(variables[i], variables[j])
                 corr = corr[0][1]
-                if corr >= 0.8:
+                if abs(corr) >= 0.1:
                     print("Relevant correlation")
+                    corr_mat[i][j] = 1
+
                 print("Coeficiente de correlación: {}".format(corr))
     print(amount)
+
+    for i in range(12):
+        for j in range(i, 12):
+            corr_mat[j][i] = corr_mat[i][j]
+
+    print(corr_mat)
+
+
     """# Insert values into textbox
     txt_1.configure(state='normal')
     txt_1.insert("end", str(corr[0][1]))
     txt_1.configure(state='disabled')"""
+
+def on_select():
+
+    # this vector saves the values that are correlated to the one selected in the combobox2
+    vec = []
+    # This vector saves the variables names
+    vec2 = []
+
+    val = 0
+    for i in range(12):
+        if dictionary[i] == combo2.get():
+            val = i
+            break
+    for i in range(0, len(corr_mat)):
+        if corr_mat[val][i] == 1:
+            vec.append(i)
+    for i in range(0, len(vec)):
+        vec2.append(dictionary[vec[i]])
+    combo3.configure(state='readonly')
+    combo3.configure(postcommand=update(vec2))
 
 
 if __name__ == "__main__":
@@ -150,7 +225,7 @@ if __name__ == "__main__":
     # Window title
     window.title("DSRED (Display System for Raspberry pi Extracted Data)")
     # Window size
-    window.geometry('800x600')
+    window.geometry('600x200')
 
     """-------------------------------------------------------GUI----------------------------------------------------"""
     '''Labels'''
@@ -159,6 +234,8 @@ if __name__ == "__main__":
     lbl_3 = Label(window, text="Graph variables")
     lbl_4 = Label(window, text="Check for correlation")
     lbl_5 = Label(window, text="Correlation coefficient")
+    lbl_6 = Label(window, text="X axis")
+    lbl_7 = Label(window, text="Y axis")
 
     '''Buttons actions'''
     # Push data
@@ -169,7 +246,7 @@ if __name__ == "__main__":
                                                                                             temph_s, tempc_i, tempc_s,
                                                                                             temp_d, temp_a))
     # Graph variables
-    btn_3 = Button(window, text="Graph", bg="gray", fg="black", command=lambda: lets_plot(combo2.get(), selected3.get()))
+    btn_3 = Button(window, text="Graph", bg="gray", fg="black", command=lambda: lets_plot(combo2.get(), combo3.get()))
     # Check correlation
     btn_4 = Button(window, text="Check", bg="gray", fg="black", command=lambda: check_for_correlation())
 
@@ -177,45 +254,32 @@ if __name__ == "__main__":
     # Radio buttons values must be different from each other
     selected2 = StringVar()  # Selected for x axis
     selected3 = StringVar()  # Selected for y axis
-    combo1 = Combobox(window, state='readonly')
-    combo2 = Combobox(window, state='readonly')
-    combo3 = Combobox(window, state='readonly')
+    combo1 = Combobox(window, width=33, state='readonly')
+    combo2 = Combobox(window, width=33, state='readonly')
+    combo3 = Combobox(window, width=33, state='disabled')
 
     combo1['values'] = ('Ultimas 24 horas', 'Ultimas 72 horas', 'Ultima semana')
-    combo2['values'] = ('Temperatura de Descarga', '% de Corriente a Plena Carga', 'Temp Introduciendo Agua de condensación',
-                        'Temp Introduciendo agua de condensación','Temperatura del Depósito de Aceite', 'Presión de Aceite',
-                        'Temp Introduciendo Agua Helada' 'Temp Salida Agua Helada')
-    combo3['values'] = (1, 2, 3, 4, 5, "Text")
+    combo2['values'] = ('% de Corriente a Plena Carga', 'Presión de Aceite', 'Presion del Evaporador',
+                       'Presión de condensador', 'Saturacion en condensador', 'Saturacion en Evaporador',
+                       'Temp Introduciendo Agua Helada', 'Temp Salida Agua Helada',
+                       'Temp Introduciendo Agua de condensación', 'Temp Salida agua de condensación',
+                       'Temperatura de Descarga','Temperatura del Depósito de Aceite')
 
+    combo3['values'] = ('% de Corriente a Plena Carga', 'Presión de Aceite', 'Presion del Evaporador',
+                       'Presión de condensador', 'Saturacion en condensador', 'Saturacion en Evaporador',
+                       'Temp Introduciendo Agua Helada', 'Temp Salida Agua Helada',
+                       'Temp Introduciendo Agua de condensación', 'Temp Salida agua de condensación',
+                       'Temperatura de Descarga','Temperatura del Depósito de Aceite')
+    #combo3.set("")
+    #combo3.trace('values', on_select)
+    combo2.bind("<<ComboboxSelected>>", lambda _ : on_select())
 
-    # Graph x axis
-    rad1x = Radiobutton(window, text='Temperatura de Descarga', value='1x', variable=selected2)
-    rad2x = Radiobutton(window, text='% de Corriente a Plena Carga', value='2x', variable=selected2)
-    rad3x = Radiobutton(window, text='Presion aceite', value='3x', variable=selected2)
-    rad4x = Radiobutton(window, text='Presion aceite', value='4x', variable=selected2)
-    rad5x = Radiobutton(window, text='Presion aceite', value='5x', variable=selected2)
-    rad6x = Radiobutton(window, text='Presion aceite', value='6x', variable=selected2)
-    rad7x = Radiobutton(window, text='Presion aceite', value='7x', variable=selected2)
-    rad8x = Radiobutton(window, text='Presion aceite', value='8x', variable=selected2)
-    rad9x = Radiobutton(window, text='Presion aceite', value='9x', variable=selected2)
-    rad10x = Radiobutton(window, text='Presion aceite', value='10x', variable=selected2)
-    rad11x = Radiobutton(window, text='Presion aceite', value='11x', variable=selected2)
-    rad12x = Radiobutton(window, text='Presion aceite', value='12x', variable=selected2)
-
-    # Graph x axis
-    rad1y = Radiobutton(window, text='Presion aceite', value='1y', variable=selected3)
-    rad2y = Radiobutton(window, text='Presion aceite', value='2y', variable=selected3)
-    rad3y = Radiobutton(window, text='Presion aceite', value='3y', variable=selected3)
-    rad4y = Radiobutton(window, text='Presion aceite', value='4y', variable=selected3)
-    rad5y = Radiobutton(window, text='Presion aceite', value='5y', variable=selected3)
-    rad8y = Radiobutton(window, text='Presion aceite', value='6y', variable=selected3)
-    rad6y = Radiobutton(window, text='Presion aceite', value='7y', variable=selected3)
-    rad7y = Radiobutton(window, text='Presion aceite', value='8y', variable=selected3)
-    rad9y = Radiobutton(window, text='Presion aceite', value='9y', variable=selected3)
-    rad10y = Radiobutton(window, text='Presion aceite', value='10y', variable=selected3)
-    rad11y = Radiobutton(window, text='Presion aceite', value='11y', variable=selected3)
-    rad12y = Radiobutton(window, text='Presion aceite', value='12y', variable=selected3)
-
+    #corrp, poil, pev, pcon, scon, sev, temphi, temphs, tempci, tempcs, tempd, tempa
+    dictionary.extend(('% de Corriente a Plena Carga', 'Presión de Aceite', 'Presion del Evaporador',
+                       'Presión de condensador', 'Saturacion en condensador', 'Saturacion en Evaporador',
+                       'Temp Introduciendo Agua Helada', 'Temp Salida Agua Helada',
+                       'Temp Introduciendo Agua de condensación', 'Temp Salida agua de condensación',
+                       'Temperatura de Descarga','Temperatura del Depósito de Aceite'))
     '''Textboxes'''
     # Correlation Coefficient
     txt_1 = Text(window, state='disabled', width=20, height=1)
@@ -223,63 +287,34 @@ if __name__ == "__main__":
     """-------------------------------------------------GRID--------------------------------------------------------"""
     '''Labels Grid'''
     # Push data
-    lbl_1.grid(column=0, row=0)
+    # lbl_1.grid(column=0, row=0)
     # Get data
     lbl_2.grid(column=0, row=1)
-    # Graph variables
-    lbl_3.grid(column=0, row=2)
     # Check correlation
-    lbl_4.grid(column=0, row=3)
-    # Correlation Coefficient
-    lbl_5.grid(column=3, row=3)
+    lbl_4.grid(column=2, row=1)
+    # X axis
+    lbl_6.grid(column=0, row=8)
+    # Y axis
+    lbl_7.grid(column=0, row=10)
+
 
     '''Buttons grid'''
     # Push data
-    btn_1.grid(column=1, row=0)
+    # btn_1.grid(column=1, row=0)
     # Get data
-    btn_2.grid(column=1, row=1)
+    btn_2.grid(column=1, row=2)
     # Graph variables
-    btn_3.grid(column=1, row=2)
+    btn_3.grid(column=1, row=11)
     # Check correlation
-    btn_4.grid(column=1, row=3)
+    btn_4.grid(column=3, row=1)
 
     '''Radio buttons grid'''
     # Time lapse
-    combo1.grid(column=20, row=5)
-    combo2.grid(column=21, row=5)
-    combo3.grid(column=22, row=5)
-
-    # Graph x axis
-    rad1x.grid(column=3, row=10)
-    rad2x.grid(column=3, row=11)
-    rad3x.grid(column=3, row=12)
-    rad4x.grid(column=3, row=13)
-    rad5x.grid(column=3, row=14)
-    rad6x.grid(column=3, row=15)
-    rad7x.grid(column=3, row=16)
-    rad8x.grid(column=3, row=17)
-    rad9x.grid(column=3, row=18)
-    rad10x.grid(column=3, row=19)
-    rad11x.grid(column=3, row=20)
-    rad12x.grid(column=3, row=21)
-
-    # Graph x axis
-    rad1y.grid(column=4, row=10)
-    rad2y.grid(column=4, row=11)
-    rad3y.grid(column=4, row=12)
-    rad4y.grid(column=4, row=13)
-    rad5y.grid(column=4, row=14)
-    rad6y.grid(column=4, row=15)
-    rad7y.grid(column=4, row=16)
-    rad8y.grid(column=4, row=17)
-    rad9y.grid(column=4, row=18)
-    rad10y.grid(column=4, row=19)
-    rad11y.grid(column=4, row=20)
-    rad12y.grid(column=4, row=21)
+    combo1.grid(column=1, row=1)
+    combo2.grid(column=1, row=8)
+    combo3.grid(column=1, row=10)
 
     '''Textboxes grid'''
-    # Correlation Coefficient
-    txt_1.grid(column=4, row=3)
 
     # Window loop, must be at the end
     window.mainloop()
