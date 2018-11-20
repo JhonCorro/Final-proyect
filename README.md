@@ -7,7 +7,7 @@
   4.  [Objectives](https://github.com/JhonCorro/Ultimate-project#4-objectives)
 
 ## 1. Title
-Data extraction system by means of image processing and variable correlation.
+Data acquisition and storage system for a LCD display.
 
 ## 2. Problem
 Many companies focused on refrigeration, with machines that regulate temperature in closed environments, do not have an internal control system for their mechanisms. The current process used for data collection consists of an operator who, at certain intervals of time, records the information shown on the screens of the devices in a spreadsheet. This situation causes the company to lose money due to the poor regulation of their systems and they see the need to invest in a control model.
